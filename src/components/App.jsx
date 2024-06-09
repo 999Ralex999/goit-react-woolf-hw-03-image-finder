@@ -15,7 +15,7 @@ export class App extends Component {
     page: 1,
     images: [],
     canLoadMore: false,
-    loading: true,
+    loading: false,
     modalImage: null,
   };
 
