@@ -1,16 +1,93 @@
-export const App = () => {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
-  );
-};
+import css from './app.css';
+import { searchImages } from '../services/pixabay';
+
+import { SearchBar } from './search_bar/search_bar';
+import { GalleryImage } from './images/gallery_image/gallery_image';
+import { Button } from './button/button';
+import { Loader } from './loader/loader';
+import { Modal } from './modal/modal';
+
+import { Component } from 'react';
+
+export class App extends Component {
+  state = {
+    query: '',
+    page: 2,
+    images: [1],
+    canLoadMore: false,
+    loading: true,
+    modalImage: null,
+  };
+
+  submitSearch = e => {
+    e.preventDefault();
+    const query = e.target.elements.query.value.trim();
+    this.setState({
+      query: query,
+      page: 2,
+      images: [1],
+    });
+  };
+
+  setModalImage = image => {
+    this.setState({ modalImage: image });
+  };
+
+  removeModalImage = () => {
+    this.setState({ modalImage: null });
+  };
+
+  async loadImages() {
+    this.setState({ loading: true });
+    try {
+      const { hits, canLoadMore } = await searchImages(
+        this.state.query,
+        this.state.page
+      );
+      this.setState(prevState => ({
+        images: [...prevState.images, ...hits],
+        canLoadMore: canLoadMore,
+      }));
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      this.setState({ loading: false });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    if (
+      this.state.page !== prevState.page ||
+      this.state.query !== prevState.query
+    ) {
+      this.loadImages();
+    }
+  }
+
+  render() {
+    return (
+      <div className={css.app}>
+        <SearchBar submitSearch={this.submitSearch} />
+        <GalleryImage
+          images={this.state.images}
+          setModalImage={this.setModalImage}
+        />
+        <Loader visible={this.state.loading} />
+        {this.state.modalImage && (
+          <Modal
+            {...this.state.modalImage}
+            removeModalImage={this.removeModalImage}
+          />
+        )}
+        {this.state.canLoadMore && this.state.images && (
+          <Button
+            onClick={() =>
+              this.setState(prevState => ({ page: prevState.page + 1 }))
+            }
+            text="Load more"
+          />
+        )}
+      </div>
+    );
+  }
+}
