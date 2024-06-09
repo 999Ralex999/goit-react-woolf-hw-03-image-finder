@@ -12,8 +12,8 @@ import { Component } from 'react';
 export class App extends Component {
   state = {
     query: '',
-    page: 2,
-    images: [1],
+    page: 1,
+    images: [],
     canLoadMore: false,
     loading: true,
     modalImage: null,
@@ -24,8 +24,8 @@ export class App extends Component {
     const query = e.target.elements.query.value.trim();
     this.setState({
       query: query,
-      page: 2,
-      images: [1],
+      page: 1,
+      images: [],
     });
   };
 
